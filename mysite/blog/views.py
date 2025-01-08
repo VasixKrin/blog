@@ -1,5 +1,4 @@
-from django.contrib.admin.templatetags.admin_list import pagination
-from django.core.paginator import Paginator
+from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.shortcuts import render, get_object_or_404
 from .models import Post
 
@@ -8,8 +7,12 @@ def post_list(request):
     post_list = Post.published.all()
     paginator = Paginator(post_list, 3)
     page_number = request.GET.get('page', 1)
-    posts = paginator.page(page_number)
-
+    try:
+        posts = paginator.page(page_number)
+    except PageNotAnInteger:
+        posts = paginator.get_page(page_number)
+    except EmptyPage:
+        posts = paginator.get_page(page_number)
     return render(
         request,
         'blog/post/list.html',
